@@ -1,0 +1,90 @@
+#ifndef DYNAMIXEL_SETUP_H
+#define DYNAMIXEL_SETUP_H
+
+#include <DynamixelSDK.h>
+
+//indirect address setup
+// Control table address
+#define ADDR_PRO_X_INDIRECTADDRESS_FOR_WRITE      578 // X-series
+#define ADDR_PRO_X_INDIRECTADDRESS_FOR_READ       594
+#define ADDR_PRO_X_INDIRECTADDRESS_FOR_TORQUE     602
+#define ADDR_PRO_H_INDIRECTADDRESS_FOR_WRITE      49  // Pro-series
+#define ADDR_PRO_H_INDIRECTADDRESS_FOR_READ       65
+#define ADDR_PRO_H_INDIRECTADDRESS_FOR_TORQUE     73
+#define ADDR_PRO_INDIRECTDATA_FOR_WRITE           634
+#define ADDR_PRO_INDIRECTDATA_FOR_READ            642
+#define ADDR_PRO_INDIRECTDATA_FOR_TORQUE          646
+
+
+//X-Serise
+// Control table address
+#define ADDR_PRO_X_TORQUE_ENABLE          64
+#define ADDR_PRO_X_PROFILE_VELOCITY       112
+#define ADDR_PRO_X_GOAL_POSITION          116
+#define ADDR_PRO_X_PRESENT_POSITION       132
+//===================================================================================================
+
+// Pro-Series
+// Control table address
+#define ADDR_PRO_H_TORQUE_ENABLE          562
+#define ADDR_PRO_H_GOAL_POSITION          596
+#define ADDR_PRO_H_PROFILE_VELOCITY       600
+#define ADDR_PRO_H_PRESENT_POSITION       611
+//====================================================================================================
+
+// Data Byte Length
+#define LEN_PRO_GOAL_AND_VELOCITY       8
+#define LEN_PRO_PRESENT_POSITION        4
+
+// Protocol version
+#define PROTOCOL_VERSION                2.0
+
+// Default settings
+#define BAUDRATE                        1000000
+#define DEVICENAME                      "OpenCR_DXL_Port"  // Port name used by OpenCR
+
+// Torque control
+#define TORQUE_ENABLE                   1
+#define TORQUE_DISABLE                  0
+
+// Dynamixel IDs
+#define DXL1_ID                         1
+#define DXL2_ID                         2
+#define DXL3_ID                         3
+#define DXL4_ID                         4
+#define DXL5_ID                         5
+#define DXL6_ID                         6
+#define DXL7_ID                         7
+#define DXL8_ID                         8
+#define DXL9_ID                         9
+#define DXL10_ID                        10
+#define DXL11_ID                        11
+#define DXL12_ID                        12
+
+class control{
+// Function declarations
+  public:
+    dynamixel::PortHandler *portHandler;
+    dynamixel::PacketHandler *packetHandler;
+    control();
+    void init(dynamixel::PortHandler *ph, dynamixel::PacketHandler *pkh);
+    void motor_address();
+    void motor_torque();
+    void motor_groupSyncWrite(int profile_velocity[13], int goal_position[13]);
+    void motor_groupSyncRead();
+    void Inverse_kinematic(float end_point_x, float end_point_y, float end_point_z, float end_point_theta, int RL);
+    void makeTransformMatrix(float roll, float pitch, float yaw, float px, float py, float pz);
+    void rad2motor(int RL);
+    void motor_speed(int motion_delay, int RL);
+    float theta[13];
+    float past_theta[13] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    int motor_position[13];
+    int profile_velocity[13] = {0, 1000, 3000, 1000, 3000, 50, 50, 1000, 3000, 1000, 3000, 50, 50};
+    float T[4][4];
+};
+
+
+
+extern control setupControl;
+
+#endif // DYNAMIXEL_SETUP_H
