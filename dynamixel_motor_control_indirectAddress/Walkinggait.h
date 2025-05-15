@@ -4,9 +4,9 @@
 #include <math.h>
 
 #define STARTSTEPCOUNTER 2
-#define COM_HEIGHT       31
-#define STAND_HEIGHT     40
-#define LENGTH_PELVIS    18
+#define COM_HEIGHT       40
+#define STAND_HEIGHT     52
+#define LENGTH_PELVIS    19.8
 #define G                981
 #define SAMPLE_TIME      30
 
@@ -27,16 +27,17 @@ public:
     long sample_point = 0;
 
     int mode = 1;                    // 控制模式
-    int step_length = 15;          // 前進量
-    int shift_length = 0;          // 平移量
+    float step_length = 0;          // 前進量
+    int shift_length =  0;          // 平移量
     float theta_ = 0;                 // 旋轉量
     float var_theta = 0;
 
-    int width_size = 9;  // 開腳寬度 (cm)
-    int period_t_ = 1200;          // 步週期 (秒)
-    float lift_height = 8;       // 擺盪腳高度 (cm)
-    float com_y_swing = 0;        // 起步補償
-    float Tdsp = 0;
+    float width_size = 9.9;  // 開腳寬度 (cm)
+    int period_t_ = 810;          // 步週期 (秒)
+    float lift_height = 6;       // 擺盪腳高度 (cm)
+    float com_y_swing = -7;        // 起步補償
+    float compensation_swing = 3; // 擺盪補償
+    float Tdsp = 0.2;
     bool ready_to_stop = false;
     bool continuous_flag = true;
 
@@ -45,6 +46,7 @@ public:
     int walking_state = 0;  // 步態狀態
     int step_ = 99999;
 
+    float compensation_y = 0;
     float footstep_x = 0;
     float footstep_y = -width_size;  // 預設的腳步Y位置
     float now_right_x, now_right_y;

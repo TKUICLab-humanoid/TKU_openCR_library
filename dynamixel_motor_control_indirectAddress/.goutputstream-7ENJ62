@@ -64,12 +64,12 @@ static void Thread_Control(void const *argument) {
 
     if (state == 1) {
       Serial.println("狀態: 伸直");
-      for (int i = 0; i < 4; i++) setupControl.motor_position[i] = 0;
-      for (int i = 6; i < 10; i++) setupControl.motor_position[i] = 0;
-      setupControl.motor_position[4] = 2048;
+      for (int i = 1; i < 5; i++) setupControl.motor_position[i] = 0;
+      for (int i = 7; i < 11; i++) setupControl.motor_position[i] = 0;
       setupControl.motor_position[5] = 2048;
-      setupControl.motor_position[10] = 2048;
+      setupControl.motor_position[6] = 2048;
       setupControl.motor_position[11] = 2048;
+      setupControl.motor_position[12] = 2048;
       setupControl.walking_groupSyncWrite(setupControl.profile_velocity, setupControl.motor_position);
       osDelay(1000);
       state = 0;
@@ -82,7 +82,7 @@ static void Thread_Control(void const *argument) {
       setupControl.walking_groupSyncWrite(setupControl.profile_velocity, setupControl.motor_position);
       for (int i = 0; i < 12; i++) setupControl.past_theta[i] = setupControl.theta[i];
       setupControl.motor_groupSyncRead();
-      // for (int i = 0; i < 12; i++) Serial.println(setupControl.motor_position[i]);
+      for (int i = 0; i < 12; i++) Serial.println(setupControl.motor_position[i]);
       osDelay(1000);
       state = 0;
     } else if (state == 3) {
@@ -104,19 +104,16 @@ static void Thread_Walking(void const *argument) {
       // setupControl.motor_groupSyncRead();
       timestamp = osKernelSysTick();
       walking.continuous();
-      setupControl.Inverse_kinematic(-walking.end_point_lx+3, -walking.end_point_ly, walking.end_point_lz, walking.end_point_ltheta, 0);
-      if (walking.now_step % 2 == 1){
-        setupControl.theta[1] -= walking.compensation_y;
+      setupControl.Inverse_kinematic(-walking.end_point_rx+3, -walking.end_point_ry, walking.end_point_rz, walking.end_point_rtheta, 0);
+      if (walking.now_step % 2 == 0){
+        setupControl.theta[1] += walking.compensation_y;
       }
       setupControl.rad2motor(0);
       setupControl.motor_speed(walking.sample_time, walking.step_length, 0);
-      setupControl.Inverse_kinematic(-walking.end_point_rx+3, -walking.end_point_ry, walking.end_point_rz, walking.end_point_rtheta, 6);
-      if (walking.now_step % 2 == 0){
-        setupControl.theta[7] += walking.compensation_y;
+      setupControl.Inverse_kinematic(-walking.end_point_lx+3, -walking.end_point_ly, walking.end_point_lz, walking.end_point_ltheta, 6);
+      if (walking.now_step % 2 == 1){
+        setupControl.theta[7] -= walking.compensation_y;
       }
-      Serial.println(walking.now_step);
-      Serial.println(setupControl.motor_position[1]);
-      Serial.println("====================");
       setupControl.rad2motor(6);
       setupControl.motor_speed(walking.sample_time, walking.step_length, 6);
       setupControl.walking_groupSyncWrite(setupControl.profile_velocity, setupControl.motor_position);

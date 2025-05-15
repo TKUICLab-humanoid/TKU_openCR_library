@@ -60,6 +60,20 @@
 #define DXL10_ID                        10
 #define DXL11_ID                        11
 #define DXL12_ID                        12
+#define DXL13_ID                        13
+#define DXL14_ID                        14
+#define DXL15_ID                        15
+#define DXL16_ID                        16
+#define DXL17_ID                        17
+#define DXL18_ID                        18
+#define DXL19_ID                        19
+#define DXL20_ID                        20
+#define DXL21_ID                        21
+#define DXL22_ID                        22
+#define DXL23_ID                        23
+#define DXL24_ID                        24
+#define DXL25_ID                        25
+#define DXL26_ID                        26
 
 class control{
 // Function declarations
@@ -70,16 +84,17 @@ class control{
     void init(dynamixel::PortHandler *ph, dynamixel::PacketHandler *pkh);
     void motor_address();
     void motor_torque();
-    void motor_groupSyncWrite(int profile_velocity[13], int goal_position[13]);
+    void motor_groupSyncWrite(int position_velocity[208]);
+    void walking_groupSyncWrite(int profile_velocity[12], int goal_position[12]);
     void motor_groupSyncRead();
     void Inverse_kinematic(float end_point_x, float end_point_y, float end_point_z, float end_point_theta, int RL);
     void makeTransformMatrix(float roll, float pitch, float yaw, float px, float py, float pz);
     void rad2motor(int RL);
-    void motor_speed(int motion_delay, int RL);
-    float theta[13];
-    float past_theta[13] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-    int motor_position[13];
-    int profile_velocity[13] = {0, 1000, 3000, 1000, 3000, 50, 50, 1000, 3000, 1000, 3000, 50, 50};
+    void motor_speed(int motion_delay, float step_length, int RL);
+    float theta[12];
+    float past_theta[12] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    int motor_position[12];
+    int profile_velocity[12] = {1000, 3000, 1000, 3000, 50, 50, 1000, 3000, 1000, 3000, 50, 50};
     float T[4][4];
 };
 

@@ -118,7 +118,7 @@ void WalkingGait::continuous(){
     case 0://stop
       Cvx = Com_vel(last_base_x, base_x, zmp_x, TT_, Tc_);
       Cpx = Com_pos(last_base_x, Cvx, zmp_x, t_, Tc_);
-      Cvy = Com_vel(last_base_y, base_y, zmp_y, TT_, Tc_);
+      Cvy = Com_vel(last_base_y, base_y, zmp_y, TT_, Tc_) - com_y_swing * sin(M_PI * t_ / TT_);
       Cpy = Com_pos(last_base_y, Cvy, zmp_y, t_, Tc_);
       Cpz = COM_HEIGHT;
       if (now_step % 2 == 0) {
@@ -150,7 +150,7 @@ void WalkingGait::continuous(){
       Cvx = Com_vel(0, base_x, zmp_x, TT_, Tc_);
       Cpx = Com_pos(0, Cvx, zmp_x, t_, Tc_);
       Cvy = Com_vel(0, base_y, zmp_y, TT_, Tc_);
-      Cpy = Com_pos(0, Cvy, zmp_y, t_, Tc_);
+      Cpy = Com_pos(0, Cvy, zmp_y, t_, Tc_)+ com_y_swing * sin(M_PI * t_ / TT_);
       Cpz = COM_HEIGHT;
       
       Lx = Swingfoot_pos_XY(now_left_x, displacement_x / 2, t_, TT_, Tdsp);
@@ -184,7 +184,7 @@ void WalkingGait::continuous(){
         Rt = 0;
       }
       else if (now_step % 2 == 1) {
-        Cpy = Com_pos(0, Cvy, zmp_y, t_, Tc_);
+        Cpy = Com_pos(0, Cvy, zmp_y, t_, Tc_) - com_y_swing * sin(M_PI * t_ / TT_);
 
         Lx = zmp_x;
         Ly = zmp_y;
@@ -202,9 +202,9 @@ void WalkingGait::continuous(){
       Cvx = Com_vel(last_base_x, base_x, zmp_x, TT_, Tc_);
       Cpx = Com_pos(last_base_x, Cvx, zmp_x, t_, Tc_);
       Cvy = Com_vel(last_base_y, base_y, zmp_y, TT_, Tc_);
-      Cpy = Com_pos(last_base_y, Cvy, zmp_y, t_, Tc_);
       Cpz = COM_HEIGHT;
       if (now_step % 2 == 0) {
+        Cpy = Com_pos(last_base_y, Cvy, zmp_y, t_, Tc_)+ com_y_swing * sin(M_PI * t_ / TT_); 
         Lx = Swingfoot_pos_XY(now_left_x, (last_displacement_x + displacement_x) / 2, t_, TT_, Tdsp);
         Ly = Swingfoot_pos_XY(now_left_y, (last_displacement_y + displacement_y) / 2, t_, TT_, Tdsp);
         Lz = Swingfoot_pos_z(lift_height, t_, TT_, Tdsp);
@@ -223,6 +223,7 @@ void WalkingGait::continuous(){
         }
       }
       else if (now_step % 2 == 1) {
+        Cpy = Com_pos(last_base_y, Cvy, zmp_y, t_, Tc_)- com_y_swing * sin(M_PI * t_ / TT_); 
         Lx = zmp_x;
         Ly = zmp_y;
         Lz = 0;
@@ -240,6 +241,14 @@ void WalkingGait::continuous(){
         }
       }
       break;
+  }
+  if (now_step % 2 == 0)
+  {
+    compensation_y = compensation_swing * sin(M_PI * t_ / TT_) * M_PI / 180;
+  }
+  else if (now_step % 2 == 1)
+  {
+    compensation_y = (compensation_swing + 1) * sin(M_PI * t_ / TT_) * M_PI / 180;
   }
   step_lxw = Lx - Cpx;
   step_rxw = Rx - Cpx;
