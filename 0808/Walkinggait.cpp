@@ -21,9 +21,9 @@ void WalkingGait::initial(){
   pre_step = -1;
   walking_state = 0;  // 步態狀態
   step_ = 99999;
+  plus_lift_height = 0;
   ready_to_stop = false;
   continuous_flag = true;
-  LC_flag = true;
 }
 
 void WalkingGait::continuous(){
@@ -32,16 +32,18 @@ void WalkingGait::continuous(){
   t_ = ((float)(time_point % period_t_) + (float)sample_time) / 1000; //步週期內時刻(s)
   now_step = (sample_point)/(period_t_/ sample_time); 
   var_theta = theta_ / 180 * M_PI;
-  if (now_step < 2){
+  if (now_step < 4){
     walking_state = 2; //start
   }
-  else if (now_step == 2){
+  else if (now_step == 4){
     walking_state = 1; // first
   }
   else if (now_step == step_){
     walking_state = 0; // stop
   }
   else if (now_step > step_) {
+    continuous_flag = false;
+    continuous_flag = false;
     continuous_flag = false;
     return;
   }
@@ -115,6 +117,15 @@ void WalkingGait::continuous(){
     hand = -hand;
   }
   pre_step = now_step;
+  if (step_length > 10 or step_length < -10) {
+    plus_lift_height = 1; 
+  }
+  // else if (step_length > 5 or step_length < -5) {
+  //   plus_lift_height = 0.5; 
+  // }
+  else {
+    plus_lift_height = 0;
+  }
   switch (walking_state) {
     case 0://stop
       Cvx = Com_vel(last_base_x, base_x, zmp_x, TT_, Tc_);
@@ -125,7 +136,7 @@ void WalkingGait::continuous(){
       if (now_step % 2 == 0) {
         Lx = Swingfoot_pos_XY(now_left_x, (last_displacement_x + displacement_x) / 2, t_, TT_, Tdsp);
         Ly = Swingfoot_pos_XY(now_left_y, (last_displacement_y + displacement_y) / 2, t_, TT_, Tdsp);
-        Lz = Swingfoot_pos_z(lift_height, t_, TT_, Tdsp);
+        Lz = Swingfoot_pos_z(lift_height + plus_lift_height, t_, TT_, Tdsp);
 
         Rx = zmp_x;
         Ry = zmp_y;
@@ -141,7 +152,7 @@ void WalkingGait::continuous(){
 
         Rx = Swingfoot_pos_XY(now_right_x, (last_displacement_x + displacement_x) / 2, t_, TT_, Tdsp);
         Ry = Swingfoot_pos_XY(now_right_y, (last_displacement_y + displacement_y) / 2, t_, TT_, Tdsp);
-        Rz = Swingfoot_pos_z(lift_height, t_, TT_, Tdsp);
+        Rz = Swingfoot_pos_z(lift_height + plus_lift_height, t_, TT_, Tdsp);
 
         Lt =  wFootTheta(-last_theta, 1, t_, TT_, Tc_);
         Rt = 0;
@@ -167,16 +178,23 @@ void WalkingGait::continuous(){
       Rt = wFootTheta(-var_theta, 0, t_, TT_, Tc_);
       break;
     case 2://start
+      int temp;
       Cvx = Com_vel(0, 0, zmp_x, TT_, Tc_);
       Cpx = Com_pos(0, Cvx, zmp_x, t_, Tc_);
       Cvy = Com_vel(0, 0, zmp_y, TT_, Tc_); 
       Cpz = COM_HEIGHT;
       if (now_step % 2 == 0) {
+        if (now_step >= 2) {
+          temp = 2;
+        }
+        else {
+          temp = 1;
+        }
         Cpy = Com_pos(0, Cvy, zmp_y, t_, Tc_) + com_y_swing * sin(M_PI * t_ / TT_);
 
         Lx = Swingfoot_pos_XY(now_left_x, 0, t_, TT_, Tdsp);
         Ly = Swingfoot_pos_XY(now_left_y, 0, t_, TT_, Tdsp);
-        Lz = Swingfoot_pos_z(lift_height / 2, t_, TT_, Tdsp);
+        Lz = Swingfoot_pos_z(lift_height / 2 * temp, t_, TT_, Tdsp);
 
         Rx = zmp_x;
         Ry = zmp_y;
@@ -186,6 +204,12 @@ void WalkingGait::continuous(){
         Rt = 0;
       }
       else if (now_step % 2 == 1) {
+        if (now_step >= 2) {
+          temp = 3 / 2;
+        }
+        else {
+          temp = 1;
+        }
         Cpy = Com_pos(0, Cvy, zmp_y, t_, Tc_) - com_y_swing * sin(M_PI * t_ / TT_);
 
         Lx = zmp_x;
@@ -194,7 +218,7 @@ void WalkingGait::continuous(){
 
         Rx = Swingfoot_pos_XY(now_right_x, 0, t_, TT_, Tdsp);
         Ry = Swingfoot_pos_XY(now_right_y, 0, t_, TT_, Tdsp);
-        Rz = Swingfoot_pos_z(lift_height / 3 * 2, t_, TT_, Tdsp);
+        Rz = Swingfoot_pos_z(lift_height / 3 * 2 * temp, t_, TT_, Tdsp);
 
         Lt = 0;
         Rt = 0;
@@ -209,7 +233,7 @@ void WalkingGait::continuous(){
         Cpy = Com_pos(last_base_y, Cvy, zmp_y, t_, Tc_)+ com_y_swing * sin(M_PI * t_ / TT_); 
         Lx = Swingfoot_pos_XY(now_left_x, (last_displacement_x + displacement_x) / 2, t_, TT_, Tdsp);
         Ly = Swingfoot_pos_XY(now_left_y, (last_displacement_y + displacement_y) / 2, t_, TT_, Tdsp);
-        Lz = Swingfoot_pos_z(lift_height, t_, TT_, Tdsp);
+        Lz = Swingfoot_pos_z(lift_height + plus_lift_height, t_, TT_, Tdsp);
 
         Rx = zmp_x;
         Ry = zmp_y;
@@ -246,24 +270,24 @@ void WalkingGait::continuous(){
       }
       break;
   }
-  if(now_step <= 2)
+  // if(now_step <= 3)
+  // {
+  //   compensation_y_hip = (compensation_swing_hip + 0) * sin(M_PI * t_ / TT_) * M_PI / 180;
+  //   compensation_y_ankle = (compensation_swing_ankle + 0) * sin(M_PI * t_ / TT_) * M_PI / 180;
+  // }
+  // else
+  // {
+  if (now_step % 2 == 0)
   {
     compensation_y_hip = (compensation_swing_hip + 0) * sin(M_PI * t_ / TT_) * M_PI / 180;
     compensation_y_ankle = (compensation_swing_ankle + 0) * sin(M_PI * t_ / TT_) * M_PI / 180;
   }
-  else
+  else if (now_step % 2 == 1)
   {
-    if (now_step % 2 == 0)
-    {
-      compensation_y_hip = (compensation_swing_hip + 0) * sin(M_PI * t_ / TT_) * M_PI / 180;
-      compensation_y_ankle = (compensation_swing_ankle + 0) * sin(M_PI * t_ / TT_) * M_PI / 180;
-    }
-    else if (now_step % 2 == 1)
-    {
-      compensation_y_hip = (compensation_swing_hip + 0) * sin(M_PI * t_ / TT_) * M_PI / 180;
-      compensation_y_ankle = (compensation_swing_ankle + 0) * sin(M_PI * t_ / TT_) * M_PI / 180;
-    }
+    compensation_y_hip = (compensation_swing_hip - 0) * sin(M_PI * t_ / TT_) * M_PI / 180;
+    compensation_y_ankle = (compensation_swing_ankle + 0) * sin(M_PI * t_ / TT_) * M_PI / 180;
   }
+  // }
   // Cpy = Cpy + 0.1 * (Cpy - com_y);
   // Cpx = Cpx - 0.1 * (Cpx - com_x);
 
@@ -303,175 +327,6 @@ void WalkingGait::continuous(){
   sample_point++;
 }
 
-void WalkingGait::LC(){
-  float TT_ = period_t_ * 0.001;
-  time_point = sample_time * sample_point;
-  t_ = ((float)(time_point % period_t_) + (float)sample_time) / 1000; //步週期內時刻(s)
-  now_step = (sample_point)/(period_t_/ sample_time); 
-  
-  Serial.println(now_step);
-  var_theta = theta_ / 180 * M_PI;
-  if (now_step < 1){
-    walking_state = 1; // first
-  }
-  else if (now_step == 2) {
-    LC_flag = false;
-    Serial.println("end~~~");
-    return;
-  }
-  else {
-    walking_state = 0; // stop
-  }
-
-  if (pre_step != now_step){
-    if (pre_step == -1){
-      footstep_x = 0;
-      footstep_y = -width_size;
-      now_right_x = footstep_x;
-      now_right_y = -width_size;
-      now_left_x = 0;
-      now_left_y = width_size;
-    }
-    else if (pre_step % 2 == 1){
-      now_right_x = footstep_x;
-      now_right_y = footstep_y;
-    }
-    else if (pre_step % 2 == 0){
-      now_left_x = footstep_x;
-      now_left_y = footstep_y;
-    }
-  
-  zmp_x = footstep_x;
-  zmp_y = footstep_y;
-  last_displacement_x = displacement_x;   //上次的跨幅
-  last_base_x = base_x;                   //上次到達的位置
-  last_displacement_y = displacement_y;   //上次的Y軸位移量
-  last_base_y = base_y;                   //上次的Y軸位移位置
-  last_theta = var_theta;                 //前一次的Theta變化量
-
-  if (walking_state == 1) {//start
-    now_width = 2 * width_size * (-pow(-1, now_step + 1));
-    width_x = -sin(var_theta) * now_width;
-    width_y = cos(var_theta) * now_width;
-    displacement_x = step_length * cos(var_theta) - shift_length * sin(var_theta) + width_x;
-    displacement_y = step_length * sin(var_theta) + shift_length * cos(var_theta) + width_y;
-    footstep_x = footstep_x + displacement_x;
-    footstep_y = footstep_y + displacement_y;   
-  }
-  else if (walking_state == 0) {// stop
-    now_width = 2 * width_size * (-pow(-1, now_step + 1));
-    width_x = -sin(var_theta) * now_width;
-    width_y = cos(var_theta) * now_width;
-    displacement_x = width_x;
-    displacement_y = width_y;
-    footstep_x = footstep_x + width_x;
-    footstep_y = footstep_y + width_y;
-  }
-  base_x = (footstep_x + zmp_x) / 2;
-  base_y = (footstep_y + zmp_y) / 2;
-  }
-
-  pre_step = now_step;
-  switch (walking_state) {
-    case 0://stop
-      Cvx = Com_vel(last_base_x, base_x, zmp_x, TT_, Tc_);
-      Cpx = Com_pos(last_base_x, Cvx, zmp_x, t_, Tc_);
-      Cvy = Com_vel(last_base_y, base_y, zmp_y, TT_, Tc_);
-      Cpy = Com_pos(last_base_y, Cvy, zmp_y, t_, Tc_);
-
-      Lx = zmp_x;
-      Ly = zmp_y;
-
-      Rx = Swingfoot_pos_XY(now_right_x, (last_displacement_x + displacement_x) / 2, t_, TT_, Tdsp);
-      Ry = Swingfoot_pos_XY(now_right_y, (last_displacement_y + displacement_y) / 2, t_, TT_, Tdsp);
-
-      if ((last_displacement_x + displacement_x) == 0) {
-        foot_lift_height = 0;
-      }
-      else {
-        foot_lift_height = ((Rx - now_right_x) / (last_displacement_x + displacement_x)) * board_height;
-        com_lift_height = foot_lift_height;
-      }
-      Cpz = COM_HEIGHT + board_height;
-      Lz = board_height;
-      Rz = Swingfoot_pos_z(lift_height, t_, TT_, Tdsp) + foot_lift_height;
-      break;
-    case 1://first
-      Cvx = Com_vel(0, base_x, zmp_x, TT_, Tc_);
-      Cpx = Com_pos(0, Cvx, zmp_x, t_, Tc_);
-      Cvy = Com_vel(0, base_y, zmp_y, TT_, Tc_);
-      Cpy = Com_pos(0, Cvy, zmp_y, t_, Tc_)+ com_y_swing * sin(M_PI * t_ / TT_);
-      
-      Lx = Swingfoot_pos_XY(now_left_x, displacement_x / 2, t_, TT_, Tdsp);
-      Ly = Swingfoot_pos_XY(now_left_y, (displacement_y - now_width) / 2, t_, TT_, Tdsp);
-      
-      Rx = zmp_x;
-      Ry = zmp_y;
-
-      if (displacement_x == 0) {
-        foot_lift_height = 0;
-      }
-      else {
-        foot_lift_height = ((Lx - now_left_x) / displacement_x) * board_height;
-        com_lift_height = foot_lift_height;
-      }
-      Cpz = COM_HEIGHT + com_lift_height;
-      Lz = Swingfoot_pos_z(lift_height, t_, TT_, Tdsp) + foot_lift_height;
-      Rz = 0;
-          
-      break;
-  }
-  if(now_step <= 2)
-  {
-    compensation_y_hip = (compensation_swing_hip + 0) * sin(M_PI * t_ / TT_) * M_PI / 180;
-    compensation_y_ankle = (compensation_swing_ankle + 0) * sin(M_PI * t_ / TT_) * M_PI / 180;
-  }
-  else
-  {
-    if (now_step % 2 == 0)
-    {
-      compensation_y_hip = (compensation_swing_hip + 1) * sin(M_PI * t_ / TT_) * M_PI / 180;
-      compensation_y_ankle = (compensation_swing_ankle + 0) * sin(M_PI * t_ / TT_) * M_PI / 180;
-    }
-    else if (now_step % 2 == 1)
-    {
-      compensation_y_hip = (compensation_swing_hip - 2) * sin(M_PI * t_ / TT_) * M_PI / 180;
-      compensation_y_ankle = (compensation_swing_ankle - 4) * sin(M_PI * t_ / TT_) * M_PI / 180;
-    }
-  }
-
-  
-  step_lxw = Lx - Cpx;
-  step_rxw = Rx - Cpx;
-
-  step_lyw = Ly - Cpy;
-  step_ryw = Ry - Cpy;
-
-  step_lx = step_lxw * cos(-var_theta) - step_lyw * sin(-var_theta);
-  step_ly = step_lxw * sin(-var_theta) + step_lyw * cos(-var_theta);
-  step_lz = Cpz - Lz;
-
-  step_rx = step_rxw * cos(-var_theta) - step_ryw * sin(-var_theta);
-  step_ry = step_rxw * sin(-var_theta) + step_ryw * cos(-var_theta);
-  step_rz = Cpz - Rz;
-
-
-  end_point_lx = step_lx;
-  end_point_ly = step_ly - width_size;
-  end_point_lz = step_lz - (COM_HEIGHT - STAND_HEIGHT);
-  
-  end_point_rx = step_rx;
-  end_point_ry = step_ry + width_size;
-  end_point_rz = step_rz - (COM_HEIGHT - STAND_HEIGHT);
-
-  end_point_ltheta = 0;
-  end_point_rtheta = 0;   
-
-  if (walking_state = 0) {
-    step_ = now_step + 1;
-  }
-  sample_point++;
-}
 
 float WalkingGait::Swingfoot_pos_XY(float start, float length, float t, float T, float T_DSP){
   float point = 0;

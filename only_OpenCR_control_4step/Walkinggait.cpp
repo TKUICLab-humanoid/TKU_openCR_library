@@ -32,10 +32,10 @@ void WalkingGait::continuous(){
   t_ = ((float)(time_point % period_t_) + (float)sample_time) / 1000; //步週期內時刻(s)
   now_step = (sample_point)/(period_t_/ sample_time); 
   var_theta = theta_ / 180 * M_PI;
-  if (now_step < 2){
+  if (now_step < 4){
     walking_state = 2; //start
   }
-  else if (now_step == 2){
+  else if (now_step == 4){
     walking_state = 1; // first
   }
   else if (now_step == step_){
@@ -176,7 +176,7 @@ void WalkingGait::continuous(){
 
         Lx = Swingfoot_pos_XY(now_left_x, 0, t_, TT_, Tdsp);
         Ly = Swingfoot_pos_XY(now_left_y, 0, t_, TT_, Tdsp);
-        Lz = Swingfoot_pos_z(lift_height / 2, t_, TT_, Tdsp);
+        Lz = Swingfoot_pos_z(lift_height / 4 * (now_step + 1), t_, TT_, Tdsp);
 
         Rx = zmp_x;
         Ry = zmp_y;
@@ -194,7 +194,7 @@ void WalkingGait::continuous(){
 
         Rx = Swingfoot_pos_XY(now_right_x, 0, t_, TT_, Tdsp);
         Ry = Swingfoot_pos_XY(now_right_y, 0, t_, TT_, Tdsp);
-        Rz = Swingfoot_pos_z(lift_height / 3 * 2, t_, TT_, Tdsp);
+        Rz = Swingfoot_pos_z(lift_height / 4 * (now_step + 1), t_, TT_, Tdsp);
 
         Lt = 0;
         Rt = 0;

@@ -29,13 +29,13 @@ public:
     long sample_point = 0;
 
     int mode = 1;                    // 控制模式
-    float step_length = 0;          // 前進量
+    float step_length = -5;          // 前進量
     int shift_length =  0;          // 平移量
     float theta_ = 0;                 // 旋轉量
     float var_theta = 0;
 
     float width_size = 9.9;  // 開腳寬度 (cm)
-    int period_t_ = 420;          // 步週期 (秒)
+    int period_t_ = 330;          // 步週期 (秒)
     float lift_height = 6;       // 擺盪腳高度 (cm)
     float com_y_swing = 0;        // 起步補償
     float compensation_swing_hip = -3; // 擺盪補償髖

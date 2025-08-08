@@ -34,23 +34,22 @@ public:
     float theta_ = 0;                 // 旋轉量
     float var_theta = 0;
 
-    float width_size = 9.9;  // 開腳寬度 (cm)
+    float width_size = 0;  // 開腳寬度 (cm)
     int period_t_ = 420;          // 步週期 (秒)
-    float lift_height = 6;       // 擺盪腳高度 (cm)
+    float lift_height = 3;       // 擺盪腳高度 (cm)
     float com_y_swing = 0;        // 起步補償
     float compensation_swing_hip = -3; // 擺盪補償髖
     float compensation_swing_ankle = 0; // 擺盪補償踝
     float Tdsp = 0;
-    float board_height = 2;
     bool ready_to_stop = false;
     bool continuous_flag = true;
-    bool LC_flag = true;
 
     int now_step = 0;
     int pre_step = -1;
     int walking_state = 0;  // 步態狀態
     int step_ = 99999;
 
+    int plus_lift_height = 0;
     float compensation_y_hip;
     float compensation_y_ankle;
     float footstep_x = 0;
@@ -69,7 +68,6 @@ public:
     float width_y = 0;
     float now_width;
     float hand = 0;
-    float foot_lift_height, com_lift_height;
     float Cvx, Cvy;
     float Cpx, Cpy, Cpz;
     float Lx, Ly, Lz, Lt;
@@ -88,7 +86,6 @@ public:
     float com_y = 0;
 
     void continuous();
-    void LC();
     void initial();
     float Swingfoot_pos_XY(float start, float length, float t, float T, float T_DSP);
     float Swingfoot_pos_z(float lift_height, float t_now, float T, float Tdsp);
